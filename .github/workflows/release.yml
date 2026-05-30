@@ -3,6 +3,10 @@ name: Goreleaser
 on:
   workflow_dispatch:
     inputs:
+      version:
+        description: "Version to release (MUST start with v, e.g., v3.2.0)"
+        required: true
+        type: string
       goReleaserArgs:
         description: "Args goreleaser"
         required: false
@@ -23,7 +27,15 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          
+
+      - name: Configure Git and Create Tag
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+          git tag ${{ github.event.inputs.version }}
+          git push origin ${{ github.event.inputs.version }}
+
       - run: git fetch --force --tags
       
       - name: Set up QEMU
